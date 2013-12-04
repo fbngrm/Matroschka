@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from operator import rshift, and_, lshift, invert, or_
 import Image
 import itertools
-import os
-import sys
 
 def as_32_bit_string(n):
     """return param n(must be an int or char) packed in a 32 bit string"""
@@ -12,9 +9,24 @@ def as_32_bit_string(n):
     # representation of the current shifting position
     byte_string = ''
     for c in range(24, -8, -8):
-        byte_string += chr(rshift(n, and_(c, 0xff)))
+        byte_string += chr(n >> c & 0xff)
     # return n packed in a 32 bit string
     return byte_string
+
+def as_bits(data):
+    """
+    returns a generator that holds a bit representation 
+    of the input data
+    """
+    # bit representation of the payload
+    # itertools.product: cartesian product of input iterables
+    # product(A, B) returns the same as ((x,y) for x in A for y in B)
+    
+    # relies on char in data < 1 byte / 8 bit / 2⁸
+    # all chars in data will be shifted 7,6,5,4,3,2,1,0 bits to the right
+    # thus a binary/bit representation of char is created
+    return (ord(char) >> shift & 1 
+        for char, shift in itertools.product(data, range(7, -1, -1)))
 
 def n_tupled(data, n, fillvalue):
     """
@@ -31,26 +43,12 @@ def n_tupled(data, n, fillvalue):
     # the generator exhaustes itself while zipping - thats why passing *[iterator]*n works
     return itertools.izip_longest(*[iter(data)] *n, fillvalue=fillvalue)
 
-def as_bits(data):
-    """
-    returns a generator that holds a bit representation 
-    of the input data
-    """
-    # bit representation of the payload
-    # itertools.product: cartesian product of input iterables
-    # product(A, B) returns the same as ((x,y) for x in A for y in B)
-    
-    # relies on char in data < 1 byte / 8 bit / 2⁸
-    # all chars in data will be shifted 7,6,5,4,3,2,1,0 bits to the right
-    # thus a binary/bit representation of char is created
-    return (and_(rshift(ord(char), shift), 0xff)
-            for char, shift in itertools.product(data, range(7, -1, -1)))
-
 def hide_msg(image, data):
     """"
     hide the payload in the least significant bits of the image
     return the manipulated image or None
     """
+    
     def set_least_sig_bit(cc, bit):
         """
         set the least significant bit of a color component
@@ -58,7 +56,7 @@ def hide_msg(image, data):
         # get the lsb by a bitwise and of the color component and 
         # the inversion of 1
         # manipulate the lsb by a bitwise or with the bit to set
-        return or_(and_(cc, invert(1)), bit)
+        return cc & ~1 | bit
 
     def hide_bits(pixel, bits):
         """
@@ -69,7 +67,7 @@ def hide_msg(image, data):
         # passing them to the zip function. zip returns a list of tuples 
         # instead of an iterator(like izip)
         return tuple(itertools.starmap(set_least_sig_bit, zip(pixel, bits)))
-    
+
     hdr = as_32_bit_string(len(data))
     payload = '%s%s' % (hdr, data)
     n_pxls = image.size[0]*image.size[1]
@@ -92,9 +90,10 @@ def extract_msg(image):
     def get_least_sig_bits(image):
         """get the least significant bits from image"""
         pxls = image.getdata()
-        return (and_(cc,1) for pxl in pxls for cc in pxl)
+        return (cc & 1 for pxl in pxls for cc in pxl)
 
     bits = get_least_sig_bits(image)
+
     def left_shift(n):
         # reduce(function, iterable[, initializer])
         # reduce(lambda x,y: x+y, [1, 2, 3, 4, 5]) calculates ((((1+2)+3)+4)+5)
@@ -104,7 +103,7 @@ def extract_msg(image):
         # create a an iterator of the first n bits
         n_bits = itertools.islice(bits, n)
         # bitwise or n bits to get an int
-        return reduce(lambda x,y: or_(lshift(x, 1),y), n_bits, 0)
+        return reduce(lambda x,y: x << 1 | y, n_bits, 0)
     
     def next_ch():
         return chr(left_shift(8))
@@ -122,20 +121,10 @@ def extract_msg(image):
         return ''.join(itertools.imap(defer, itertools.repeat(next_ch, data_length)))
 
 if __name__ == "__main__":
-#     import urllib
-#     droste = urllib.urlopen("http://is.gd/cHqT").read()
-#     open("droste.png", "wb").write(droste)
-#     droste = Image.open("droste.png")
-#     while droste:
-#         droste.show()
-#         droste = extract_msg(droste)
-#         if droste:
-#             open("droste.png", "wb").write(droste)
-#             droste = Image.open("droste.png")
-#     i = Image.open('../resources/rocket.png')  
-#     hide_msg(i, 'the floating coffin')
-    
-#    print extract_msg(i)
+    import sys, os
+    import hmac
+    import hashlib
+    import base64
 
     if len(sys.argv)!=3:
         print "use: python steganohide.py text.txt bild.bmp"
@@ -152,12 +141,22 @@ if __name__ == "__main__":
     
     image = Image.open(img)
     data = open(text).read()
-    secret = hide_msg(image, data)
-    print extract_msg(image)
+    hmac_pass = 'secret'
+
+    h_mac = hmac.new(hmac_pass, bytes(data), digestmod=hashlib.sha256).digest()
+    h_mac+='--:--'+data
+    secret = hide_msg(image, h_mac)
     
     name, ext = os.path.splitext(img)
     secret.save('%s_%s' % (name, ext))
     os.rename('%s_%s' % (name, ext), '%s.ste' % img)
-    Image.open('%s.ste' % img).show()
+    i = Image.open('%s.ste' % img)
+    secret = extract_msg(i)
+    mac = secret.split('--:--')[0]
+    print 'hmac: ' + mac
+    data = secret.split('--:--')[1]
+    print 'secret: '+ data
 
-    
+    h_mac = hmac.new(hmac_pass, bytes(data), digestmod=hashlib.sha256).digest()
+    print 'check hmac: ' + str(h_mac==mac)
+    i.show()
