@@ -15,14 +15,13 @@ def as_32_bit_string(n):
 
 def as_bits(data):
     """
-    returns a generator that holds a bit representation 
+    returns a generator that provides a bit representation 
     of the input data
     """
     # bit representation of the payload
     # itertools.product: cartesian product of input iterables
     # product(A, B) returns the same as ((x,y) for x in A for y in B)
     
-    # relies on char in data < 1 byte / 8 bit / 2⁸
     # all chars in data will be shifted 7,6,5,4,3,2,1,0 bits to the right
     # thus a binary/bit representation of char is created
     return (ord(char) >> shift & 1 
@@ -122,9 +121,6 @@ def extract_msg(image):
 
 if __name__ == "__main__":
     import sys, os
-    import hmac
-    import hashlib
-    import base64
 
     if len(sys.argv)!=3:
         print "use: python steganohide.py text.txt bild.bmp"
@@ -136,27 +132,19 @@ if __name__ == "__main__":
     if not os.path.exists(text): raise IOError('File does not exist: %s' % text)
     if not os.path.exists(img): raise IOError('File does not exist: %s' % img)
     
-    print 'text: %s' % sys.argv[1]
-    print 'image: %s' % sys.argv[2]
+    print 'Use text from: \n%s\n' % sys.argv[1]
+    print 'Use image from: \n%s\n' % sys.argv[2]
     
     image = Image.open(img)
     data = open(text).read()
-    hmac_pass = 'secret'
 
-    h_mac = hmac.new(hmac_pass, bytes(data), digestmod=hashlib.sha256).digest()
-    h_mac+='--:--'+data
-    secret = hide_msg(image, h_mac)
+    secret = hide_msg(image, data)
     
     name, ext = os.path.splitext(img)
     secret.save('%s_%s' % (name, ext))
     os.rename('%s_%s' % (name, ext), '%s.ste' % img)
     i = Image.open('%s.ste' % img)
     secret = extract_msg(i)
-    mac = secret.split('--:--')[0]
-    print 'hmac: ' + mac
-    data = secret.split('--:--')[1]
-    print 'secret: '+ data
 
-    h_mac = hmac.new(hmac_pass, bytes(data), digestmod=hashlib.sha256).digest()
-    print 'check hmac: ' + str(h_mac==mac)
+    print 'Hidden message is: \n%s\n' % secret
     i.show()
