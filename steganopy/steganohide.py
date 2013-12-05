@@ -5,7 +5,7 @@ import itertools
 
 def as_32_bit_string(n):
     """return param n(must be an int or char) packed in a 32 bit string"""
-    # rightshift n bytewise from 0 to 3 bytes. use chr(n) to chop 1 byte ascii 
+    # rightshift n bytewise from 0 to 3 bytes. use chr(n) to chop 1 byte 
     # representation of the current shifting position
     byte_string = ''
     for c in range(24, -8, -8):
@@ -24,7 +24,7 @@ def as_bits(data):
     
     # all chars in data will be shifted 7,6,5,4,3,2,1,0 bits to the right
     # thus a binary/bit representation of char is created
-    return (ord(char) >> shift & 1 
+    return (ord(char) >> shift & 1
         for char, shift in itertools.product(data, range(7, -1, -1)))
 
 def n_tupled(data, n, fillvalue):
@@ -59,10 +59,10 @@ def hide_msg(image, data):
 
     def hide_bits(pixel, bits):
         """
-        hide the a in a color component
+        hide the bit in a color component
         return the tupled pixel with manipulated lsb
         """
-        # tuple the 4 color components and the 4 payload bits by
+        # tuple the 3 color components and the 3 payload bits by
         # passing them to the zip function. zip returns a list of tuples 
         # instead of an iterator(like izip)
         return tuple(itertools.starmap(set_least_sig_bit, zip(pixel, bits)))
