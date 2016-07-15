@@ -9,6 +9,10 @@ import sys
 
 
 def create_hmac(mac_pass, msg_bytes):
+    """
+    Create an hmac keyed hash for the given message
+    using the SHA-256 digest algorithm.
+    """
     return hmac.new(
         mac_pass, msg_bytes, digestmod=hashlib.sha256).digest()
 
@@ -20,6 +24,11 @@ def save_img(img):
 
 
 def get_msg(img):
+    """
+    Extract the hidden message fro the given image.
+    Authenticate the hidden message by validating the
+    hmac hash sliced from the hidden message.
+    """
     i = Image.open('%s.ste' % img)
     secret = stg.extract_msg(i)
     mac = secret.split('--:--')[0]
@@ -30,27 +39,37 @@ def get_msg(img):
     i.show()
 
 
-def check_hmac(mac):
+def check_hmac(hmac):
+    """
+    Check if the given hmac ist valid by creating
+    a new hmac with the supplied password and the data.
+    """
     h_mac = hmac.new(args['m'], bytes(data), digestmod=hashlib.sha256).digest()
-    print 'HMAC validation: \n%s\n' % str(h_mac == mac)
+    print 'HMAC validation: %s\n' % str(h_mac == hmac)
 
 
 def hash_128_bit_pass(passwd):
+    """
+    Create a hash of the given password using the
+    SHA-256 digest algorithm.
+    """
     h = hashlib.sha256()
     h.update(passwd)
     return h.hexdigest()[:16]
 
 
-def crypt(data, key):
-    iv = os.urandom(8)
-    z = xtea.crypt(key, data, iv)
-    print xtea.crypt(key, z, iv)
-    print xtea.crypt(key, z, iv) == data
+def crypt(data, key, iv):
+    """
+    Encrypt or decrypt the given data with the given
+    key using the XTEA algorithm in CFB mode.
+    """
+    return xtea.crypt(key, data, iv)
 
 
 def read_image(image_path):
     """
-    Read the image data of the given path and return an Image object
+    Read the image data of the given path
+    and return an Image object
     """
     if not os.path.exists(image_path):
         raise IOError('File does not exist: %s' % image_path)
@@ -60,7 +79,9 @@ def read_image(image_path):
 
 def read_text(text_path):
     """
-    Read the content of the given text file and return the content as a string"""
+    Read the content of the given text file and
+    return the content as a string
+    """
     if not os.path.exists(text_path):
             raise IOError('File does not exist: %s' % text_path)
     return open(text_path).read()
@@ -94,11 +115,27 @@ if __name__ == '__main__':
         print "need image to embed data"
         sys.exit(0)
 
+    # create hmac from the supplied mac password hashed with SHA-256 
+    # digest algorithm and the supllied image or text data 
     h_mac = create_hmac(args['m'], bytes(data))
+
+    #  
     secret = stg.hide_msg(image, '%s--:--%s' % (h_mac, data))
 
+    # save the image containing the embeded and encrypted 
+    # data to disk with the extension .ste
     save_img(args['image'])
+
+    # extract and authenticate the hidden message in the image data
     get_msg(args['image'])
 
+    # create a SHA-256 hash of the high-order 128 bit of the given password
     key = hash_128_bit_pass(args['k'])
-    iv = crypt(data, key)
+
+    # encrupy the data using the XTEA algorithm in CFB mode with the 128 bit
+    # SHA-256 hash of the password as key
+    encrypted_data = crypt(data, key)
+    iv = os.urandom(8)
+    print xtea.crypt(key, encrypted_data, iv)
+    print xtea.crypt(key, encrypted_data, iv) == data
+
