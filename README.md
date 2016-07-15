@@ -16,7 +16,7 @@ The random seed is appended to the hidden secret and is used with the user suppl
 > This is a fun project. Do not use this for serious encryption purposes!
 
 # Usage
-Only losless image formats are supported. Therefore It is recommended to use PNG or BMP images to hide your secret. The secret can be either an text file with the `.txt` extension or an image with the `.png` extension and format. 
+Only losless image formats are supported. Therefore It is recommended to use PNG or BMP images to hide your secret. The secret can be either a text file with the `.txt` extension or an image with the `.png` extension and format. 
 
 > Note: If your image contains transparent pixels, most likely artifacts will be visible after embedding data. This is caused by the manipulation of the least-significant bit in every pixels color channels.
 
