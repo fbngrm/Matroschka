@@ -22,13 +22,13 @@ Only losless image formats are supported. Therefore It is recommended to use PNG
 
 **Hide Secret**
 
-```python 
+```bash 
 python matroschka.py -hide -m <mac-password> -k <password> <secret> <image>
 ```
 
 **Reveal Secret**
 
-```python 
+```bash 
 python matroschka.py -open -m <mac-password> -k <password> <image>
 ```
 
@@ -36,13 +36,13 @@ python matroschka.py -open -m <mac-password> -k <password> <image>
 
 matroschka_medium.png gets hidden and encrypted in matroschka_big.png.
 
-```python
+```bash 
 python matroschka.py -hide -m foo -k bar resources/matroschka_medium.png resources/matroschka_big.png
 ```
 
 Decrypting the image will save the extracted image in resources/secret-image.png
 
-```python 
+```bash 
 python matroschka.py -open -m foo -k bar resources/matroschka_big.png
 ```
 
