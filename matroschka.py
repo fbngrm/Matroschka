@@ -33,7 +33,7 @@ def get_msg(img):
     i.show()
 
 
-def check_hmac(mac):
+def check_hmac(mac, data):
     """
     Check if the given hmac ist valid by creating
     a new hmac with the supplied password and the data.
@@ -104,9 +104,7 @@ def encrypt(data_type):
 
     # save the image containing the embeded and encrypted
     # data to disk with the extension .ste
-    name, ext = os.path.splitext(args['image'])
-    matroschka.save('%s_%s' % (name, ext))
-    os.rename('%s_%s' % (name, ext), '%s.ste' % args['image'])
+    matroschka.save(args['image'])
 
     print "successfully encrypted your secret message"
     matroschka.show()
@@ -114,7 +112,7 @@ def encrypt(data_type):
 
 def decrypt():
     # extract and authenticate the hidden message in the image data
-    image = Image.open('%s.ste' % args['image'])
+    image = Image.open(args['image'])
     matroschka = stg.extract_msg(image)
 
     # get the 8 byte iv and the encrypted secret from the image data
@@ -129,9 +127,6 @@ def decrypt():
     # split hmac and message data
     mac, data = decrypted_secret.split('--:--')
 
-    print 'HMAC hex is: \n%s\n' % mac.encode('hex')
-    check_hmac(mac)
-
     if data_type == 'image':
         ipath = "resources/secret-image.png"
         print "the secret image is stored under: " + ipath
@@ -141,6 +136,9 @@ def decrypt():
         Image.open(ipath).show()
     else:
         print 'The hidden message is: \n%s\n' % data
+
+    print 'HMAC hex is: \n%s\n' % mac.encode('hex')
+    check_hmac(mac, data)
 
 
 if __name__ == '__main__':
@@ -171,9 +169,6 @@ if __name__ == '__main__':
         else:
             print "need secret message either as .txt or .png file"
             sys.exit(0)
-    else:
-        print "need data to embed - either text or image"
-        sys.exit(0)
 
     if args['image']:
         image = read_image(args['image'])
