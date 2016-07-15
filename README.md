@@ -34,7 +34,7 @@ python matroschka.py -open -m <mac-password> -k <password> <image>
 
 **Example**
 
-matroschka_medium.png gets hidden and encrypted in matroschka_big.png.
+*matroschka_medium.png* gets hidden and encrypted in *matroschka_big.png*
 
 ```bash 
 python matroschka.py -hide -m foo -k bar resources/matroschka_medium.png resources/matroschka_big.png
