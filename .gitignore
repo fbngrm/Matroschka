@@ -1,5 +1,7 @@
 .project
 ./pydevproject
 .settings
+*.pydevproject
+*.swp
 
 
