@@ -22,20 +22,28 @@ Only losless image formats are supported. Therefore It is recommended to use PNG
 
 **Hide Secret**
 
-`python matroschka.py -hide -m <mac-password> -k <password> <secret> <image>`
+```python 
+python matroschka.py -hide -m <mac-password> -k <password> <secret> <image>
+```
 
 **Reveal Secret**
 
-`python matroschka.py -open -m <mac-password> -k <password> <image>`
+```python 
+python matroschka.py -open -m <mac-password> -k <password> <image>
+```
 
 **Example**
 
 matroschka_medium.png gets hidden and encrypted in matroschka_big.png.
 
-`python matroschka.py -hide -m foo -k bar resources/matroschka_medium.png resources/matroschka_big.png`
+```python
+python matroschka.py -hide -m foo -k bar resources/matroschka_medium.png resources/matroschka_big.png
+```
 
 Decrypting the image will save the extracted image in resources/secret-image.png
 
-`python matroschka.py -open -m foo -k bar resources/matroschka_big.png`
+```python 
+python matroschka.py -open -m foo -k bar resources/matroschka_big.png
+```
 
 
