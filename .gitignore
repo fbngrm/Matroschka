@@ -3,5 +3,6 @@
 .settings
 *.pydevproject
 *.swp
+*.pyc
 
 
