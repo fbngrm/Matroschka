@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import Image
+try:
+    import Image
+except:
+    from PIL import Image
+
 import itertools
 
 

@@ -1,4 +1,8 @@
-import Image
+try:
+    import Image
+except:
+    from PIL import Image
+
 import argparse
 import hashlib
 import hmac
