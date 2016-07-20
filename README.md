@@ -15,6 +15,14 @@ The random seed is appended to the hidden secret and is used with the user suppl
 # Note
 > This is a fun project. Do not use this for serious encryption purposes!
 
+#Installation
+You may want to install Matroschka in a `virtualenv` that has `Pillow` installed. Clone the repo and navigate to the root dir. That's it.
+```bash
+pip install Pillow
+git clone git@github.com:fgrimme/Matroschka.git
+cd Matroschka
+```
+
 # Usage
 Only losless image formats are supported. Therefore It is recommended to use PNG or BMP images to hide your secret. The secret can be either a text file with the `.txt` extension or an image with the `.png` extension and format. 
 
