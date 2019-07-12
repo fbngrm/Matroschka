@@ -54,5 +54,5 @@ Decrypting the image will save the extracted image in resources/secret-image.png
 python matroschka.py -open -m foo -k bar resources/matroschka_big.png
 ```
 
-#License
+# License
 GNU General Public License 3.0
