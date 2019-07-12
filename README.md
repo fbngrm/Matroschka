@@ -3,7 +3,7 @@
 <img src="/resources/matroschka.png" alt="Matroschka" width="250px">
 
 # About
-**Матрёшка** [mɐˈtrʲɵʂkə] is a command-line steganography tool written in pure Python. You can use it to hide and encrypt images or text in the least significant bits of pixels in an image. 
+Matroshka is a command-line steganography tool written in pure Python. You can use it to hide and encrypt images or text in the least significant bits of pixels in an image. 
 
 # Encryption
 The encryption uses **HMAC-SHA256** to authenticate the hidden data. Therefore the supplied **MAC** password is hashed with **SHA-256** digest to generate the **HMAC-SHA256** key. 
