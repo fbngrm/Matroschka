@@ -119,6 +119,10 @@ def decrypt():
     image = Image.open(args['image'])
     matroschka = stg.extract_msg(image)
 
+    if matroschka is None:
+        print "No message was extracted"
+        return 1
+
     # get the 8 byte iv and the encrypted secret from the image data
     data_type, iv, encrypted_secret = matroschka.split('--:--')
 
